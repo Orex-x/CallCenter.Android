@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "563926694758",
+    "project_id": "callcentermars-830b4",
+    "storage_bucket": "callcentermars-830b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563926694758:android:72ababef552af25fd9e6a7",
+        "android_client_info": {
+          "package_name": "com.example.callcenter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563926694758-1pa9vfrjpmlq3oivkp7uld35oa0s6mt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1YiyVPRDVbi3NLkdxXGidsYnj8tcYwBw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563926694758-1pa9vfrjpmlq3oivkp7uld35oa0s6mt1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
