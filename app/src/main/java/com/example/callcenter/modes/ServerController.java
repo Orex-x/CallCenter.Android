@@ -1,13 +1,24 @@
 package com.example.callcenter.modes;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.example.callcenter.MainActivity;
 import com.example.callcenter.intarface.ISignalRListener;
+import com.example.callcenter.services.CallBook;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
+
+import java.util.ArrayList;
 
 import io.reactivex.Single;
 import retrofit2.Retrofit;
@@ -15,10 +26,15 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServerController {
-    private static String _host = "https://233d-62-217-190-128.ngrok.io";
+    private static String _host = "https://2d80-62-217-190-128.ngrok.io";
     private static String _token;
     private static HubConnection _hubConnection;
     private Retrofit _retrofit;
+    private static Context _context;
+    private static Activity _activity;
+
+    private static final int REQUEST_CODE_READ_CALL_LOG = 2;
+    private static boolean READ_FILES_GRANTED = false;
 
     private static ISignalRListener iSignalRListener;
     public void setISignalRListener(ISignalRListener listener) {
@@ -33,19 +49,12 @@ public class ServerController {
         ServerController._token = _token;
     }
 
-    public void startSignalRConnection() {
+    public void startSignalRConnection(Context context, Activity activity) {
         if(_token != null){
             _hubConnection = HubConnectionBuilder.create(_host + "/ChatHub")
                     .withAccessTokenProvider(Single.defer(() -> {
                         return Single.just(_token);
                     })).build();
-
-   /*         _hubConnection.on("ReceiveMeMessage", (message) -> {
-                Log.d("Call ReceiveMeMessage", message);
-                if(iSignalRListener != null){
-                    iSignalRListener.ReceiveMessage(message);
-                }
-            }, String.class);*/
 
             _hubConnection.on("ReceiveCallPhone", (phone) -> {
                 Log.d("Call receiveCallPhone", phone);
@@ -55,6 +64,45 @@ public class ServerController {
             }, String.class);
 
             new HubConnectionTask().execute(_hubConnection);
+            _context = context;
+            _activity = activity;
+        }
+    }
+
+    public static void sendLastCall(){
+        setPermissionReadCallLogs();
+    }
+
+
+    public static void setPermissionReadCallLogs(){
+        // получаем разрешения
+        int hasPermissionReadCallLogs =
+                ContextCompat.checkSelfPermission(_context, Manifest.permission.READ_CALL_LOG);
+        // если устройство до API 23, устанавливаем разрешение
+        if (hasPermissionReadCallLogs == PackageManager.PERMISSION_GRANTED) {
+            READ_FILES_GRANTED = true;
+        } else {
+            // вызываем диалоговое окно для установки разрешений
+            ActivityCompat.requestPermissions(_activity,
+                    new String[]{Manifest.permission.READ_CALL_LOG},
+                    REQUEST_CODE_READ_CALL_LOG);
+        }
+        // если разрешение установлено
+        if (READ_FILES_GRANTED) {
+            new myThread().start();
+        }
+    }
+
+    static class myThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Call call = CallBook.getLastCall(_context);
+            _hubConnection.send("CallLog", call);
         }
     }
 

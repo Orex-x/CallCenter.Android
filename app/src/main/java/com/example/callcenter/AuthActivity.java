@@ -1,10 +1,14 @@
 package com.example.callcenter;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,10 +18,14 @@ import com.example.callcenter.fragment.FragmentRegistration;
 import com.example.callcenter.intarface.APIService;
 import com.example.callcenter.intarface.OnFragmentAuthListener;
 import com.example.callcenter.intarface.OnFragmentRegistrationListener;
+import com.example.callcenter.modes.Call;
 import com.example.callcenter.modes.RegistrationModel;
 import com.example.callcenter.modes.ServerController;
 import com.example.callcenter.modes.TokenResponse;
 import com.example.callcenter.modes.User;
+import com.example.callcenter.services.CallBook;
+
+import java.util.ArrayList;
 
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -41,6 +49,8 @@ public class AuthActivity extends AppCompatActivity implements OnFragmentAuthLis
         outState.putString("current_fragment", current_fragment);
         super.onSaveInstanceState(outState);
     }
+
+
 
 
     @Override
@@ -106,7 +116,7 @@ public class AuthActivity extends AppCompatActivity implements OnFragmentAuthLis
 
     @Override
     public void clickSignIn(String  login, String password) {
-        Log.d("clickSignIn", "start");
+        Log.d("hubConnection", "start");
 
         api.Token(login, password)
                 .subscribeOn(Schedulers.newThread())

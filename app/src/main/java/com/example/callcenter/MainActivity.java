@@ -1,41 +1,33 @@
 package com.example.callcenter;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.example.callcenter.intarface.APIService;
 import com.example.callcenter.intarface.ISignalRListener;
 import com.example.callcenter.modes.ServerController;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.microsoft.signalr.HubConnection;
-import com.microsoft.signalr.HubConnectionBuilder;
+import com.example.callcenter.services.CallBook;
 
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ISignalRListener {
 
     private static final int REQUEST_CODE_CALL = 1;
     private static boolean CALL_GRANTED = false;
+
+
+
     Button btn;
     ServerController serverController;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +36,12 @@ public class MainActivity extends AppCompatActivity implements ISignalRListener 
         btn = findViewById(R.id.btn);
         serverController = new ServerController();
         serverController.setISignalRListener(this);
-        serverController.startSignalRConnection();
+        serverController.startSignalRConnection(this, this);
+
+
     }
+
+
 
 
     void call(String phone){
@@ -56,16 +52,29 @@ public class MainActivity extends AppCompatActivity implements ISignalRListener 
 
 
      void setPermission(String phone){
-        // hubConnection.send("SendMessage", "asd", "asd");
+
         // получаем разрешения
-        int hasReadFilesPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
+        int hasCALL_PHONEPermission = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CALL_PHONE);
+
+         int hasREAD_PHONE_STATEPermission = ContextCompat.checkSelfPermission(
+                 this, Manifest.permission.READ_PHONE_STATE);
+
+         int hasPROCESS_OUTGOING_CALLSPermission = ContextCompat.checkSelfPermission(
+                 this, Manifest.permission.PROCESS_OUTGOING_CALLS);
+
+
         // если устройство до API 23, устанавливаем разрешение
-        if (hasReadFilesPermission == PackageManager.PERMISSION_GRANTED) {
+        if (hasCALL_PHONEPermission == PackageManager.PERMISSION_GRANTED
+                && hasREAD_PHONE_STATEPermission == PackageManager.PERMISSION_GRANTED
+                && hasPROCESS_OUTGOING_CALLSPermission == PackageManager.PERMISSION_GRANTED) {
             CALL_GRANTED = true;
         } else {
             // вызываем диалоговое окно для установки разрешений
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CALL_PHONE},
+                    new String[]{Manifest.permission.CALL_PHONE,
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.PROCESS_OUTGOING_CALLS},
                     REQUEST_CODE_CALL);
         }
         // если разрешение установлено
@@ -77,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements ISignalRListener 
     @Override
     public void ReceiveCallPhone(String phone) {
         setPermission(phone);
+
     }
 
     @Override
