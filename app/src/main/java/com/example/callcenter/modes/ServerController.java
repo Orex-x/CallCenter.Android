@@ -19,14 +19,16 @@ import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import io.reactivex.Single;
+import okhttp3.internal.http2.Header;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServerController {
-    private static String _host = "https://2d80-62-217-190-128.ngrok.io";
+    private static String _host = "https://fcce-62-217-190-128.ngrok.io";
     private static String _token;
     private static HubConnection _hubConnection;
     private Retrofit _retrofit;
@@ -51,10 +53,18 @@ public class ServerController {
 
     public void startSignalRConnection(Context context, Activity activity) {
         if(_token != null){
+
+            String str = android.os.Build.MODEL;
+
+            HashMap<String, String> HEADERS = new HashMap<>();
+            HEADERS.put("Hostname", str);
+
             _hubConnection = HubConnectionBuilder.create(_host + "/ChatHub")
+                    .withHeaders(HEADERS)
                     .withAccessTokenProvider(Single.defer(() -> {
                         return Single.just(_token);
                     })).build();
+
 
             _hubConnection.on("ReceiveCallPhone", (phone) -> {
                 Log.d("Call receiveCallPhone", phone);
