@@ -51,6 +51,12 @@ public class ServerController {
         ServerController._token = _token;
     }
 
+    public void disconnect(){
+        if(_hubConnection != null){
+            _hubConnection.stop();
+        }
+    }
+
     public void startSignalRConnection(Context context, Activity activity) {
         if(_token != null){
 
@@ -72,6 +78,14 @@ public class ServerController {
                     iSignalRListener.ReceiveCallPhone(phone);
                 }
             }, String.class);
+
+            _hubConnection.on("ReceiveTerminateConnection", () -> {
+                if(iSignalRListener != null){
+                    iSignalRListener.LogOut();
+                }
+            });
+
+
 
             new HubConnectionTask().execute(_hubConnection);
             _context = context;

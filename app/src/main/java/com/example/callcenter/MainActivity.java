@@ -24,16 +24,12 @@ public class MainActivity extends AppCompatActivity implements ISignalRListener 
     private static final int REQUEST_CODE_CALL = 1;
     private static boolean CALL_GRANTED = false;
 
-
-
-    Button btn;
     ServerController serverController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btn = findViewById(R.id.btn);
         serverController = new ServerController();
         serverController.setISignalRListener(this);
         serverController.startSignalRConnection(this, this);
@@ -92,5 +88,12 @@ public class MainActivity extends AppCompatActivity implements ISignalRListener 
     @Override
     public void ReceiveMessage(String message) {
         Log.d("ReceiveMessage",  message);
+    }
+
+    @Override
+    public void LogOut() {
+        serverController.disconnect();
+        Intent intent = new Intent(this, AuthActivity.class);
+        startActivity(intent);
     }
 }
